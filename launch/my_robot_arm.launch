@@ -2,7 +2,7 @@
 
 <launch>
 
-    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find my_robot_arm)/urdf/my_robot_arm.xacro'"/>
+    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find fisica)/urdf/my_robot_arm.xacro'"/>
 
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher"/>
 
@@ -10,9 +10,6 @@
         <param name="use_gui" value="True"/>
     </node>
 
-<!--
-    <node name="robot_controller" pkg="my_robot_arm" type="robot_controller.py"/>
--->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find my_robot_arm)/launch/config.rviz"/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find fisica)/launch/config.rviz"/>
 
 </launch>
