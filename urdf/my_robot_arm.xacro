@@ -1,0 +1,140 @@
+<?xml version="1.0"?>
+
+<robot name="my_robot_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find my_robot_arm)/urdf/links_joints.xacro"/>
+
+    <xacro:property name="h1" value=".3"/>
+    <xacro:property name="d2" value=".2"/>
+    <xacro:property name="d3" value=".3"/>
+
+    <!-- BASE -->
+    <xacro:m_link_cylinder 
+                name="base_link"
+	        origin_rpy="0 0 0" 
+                origin_xyz="0 0 .0025"
+	        radius="0.1" 
+                length=".01"
+                material="white"/>
+
+    <!-- ARTICULACION 1 (revolucion eje Z) -->
+    <xacro:m_joint_r    
+                name="base_link__link_01"
+                axis_xyz="0 0 1"
+                origin_rpy="0 0 0" origin_xyz="0 0 0"
+                min="-3.14" max="3.14"
+                parent="base_link"
+                child="link_01"/>
+
+    <!-- ESLABON 1 -->
+    <xacro:m_link_cylinder 
+                name="link_01"
+	        origin_rpy="0 0 0" 
+                origin_xyz="0 0 ${h1/2}"
+	        radius="0.025" 
+                length="${h1}"
+                material="red"/>
+    
+    <!-- ARTICULACION 2 (revolucion eje Y) -->
+    <xacro:m_joint_r    
+                name="link_01__link_02"
+                axis_xyz="0 1 0"
+                origin_rpy="0 0 0" origin_xyz="0 0 ${h1}"
+                min="-3.14" max="3.14"
+                parent="link_01"
+                child="link_02"/>
+    
+    <!-- ESLABON 2 -->
+    <xacro:m_link_cylinder 
+                name="link_02"
+	        origin_rpy="-1.57 0 0" 
+                origin_xyz="0 ${d2/2} 0"
+	        radius="0.025" 
+                length="${d2}"
+                material="red"/>
+
+    <!-- ARTICULACION 3 (prismatica eje Z) -->
+    <xacro:m_joint_p  
+                name="link_02__link_03"
+                axis_xyz="0 0 1"
+                origin_rpy="0 0 0" origin_xyz="0 ${d2} 0"
+                min="${-d3/2 + .02}" max="${d3/2 - .02}"
+                parent="link_02"
+                child="link_03"/>
+
+    <!-- ESLABON 3 -->
+    <xacro:m_link_box 
+                name="link_03"
+	        origin_rpy="0 0 0" 
+                origin_xyz="0 0 0"
+	        size="0.04 0.04 ${d3}" 
+                material="orange"/>
+
+    <!-- MUNECA -->
+ 
+    <!-- ARTICULACION 4 (revolucion eje Z) -->
+    <xacro:m_joint_r  
+                name="link_03__link_04"
+                axis_xyz="0 0 1"
+                origin_rpy="0 0 0" origin_xyz="0 0 -${d3/2}"
+                min="-3.14" max="3.14"
+                parent="link_03"
+                child="link_04"/>
+
+    <xacro:m_link_cylinder 
+                name="link_04"
+	        origin_rpy="0 0 0" 
+                origin_xyz="0 0 0"
+	        radius="0.025"
+                length="0.01" 
+                material="blue"/>
+              
+    <!-- ARTICULACION 5 (revolucion eje X) -->
+    <xacro:m_joint_r    
+                name="link_04__link_05"
+                axis_xyz="1 0 0"
+                origin_rpy="0 0 0" origin_xyz="0 0 0"
+                min="-0.35" max="0.35"
+                parent="link_04"
+                child="link_05"/>
+    
+    <xacro:m_link_cylinder 
+                name="link_05"
+	        origin_rpy="0 1.57 0" 
+                origin_xyz="0 0 0"
+	        radius="0.025"
+                length="0.01" 
+                material="red"/>
+ 
+    <!-- ARTICULACION 6 (revolucion eje Y) -->
+    <xacro:m_joint_r    
+                name="link_05__gripper"
+                axis_xyz="0 1 0"
+                origin_rpy="0 0 0" origin_xyz="0 0 0"
+                min="-0.35" max="0.35"
+                parent="link_05"
+                child="link_06"/>
+    
+    <xacro:m_link_cylinder 
+                name="link_06"
+	        origin_rpy="1.57 0 0" 
+                origin_xyz="0 0 0"
+	        radius="0.025"
+                length="0.01" 
+                material="green"/>
+
+    <!-- ARTICULACION PINZA (fija) -->
+    <xacro:m_joint_f    
+                name="link_06__gripper"
+                axis_xyz="0 1 0"
+                origin_rpy="0 0 0" origin_xyz="0 0 0"
+                parent="link_06"
+                child="link_gripper"/>
+    
+    <!-- PINZA -->
+    <xacro:gripper
+                name="link_gripper"
+                material="white"/> 
+
+</robot>
+

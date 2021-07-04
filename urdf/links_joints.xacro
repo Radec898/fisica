@@ -1,0 +1,177 @@
+<?xml version="1.0"?>
+<robot name="my_robot_arm_macros" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:macro name="m_joint_r" params="name min max axis_xyz origin_rpy origin_xyz parent child">
+        <joint name="${name}" type="revolute">
+            <axis xyz="${axis_xyz}"/>
+            <limit effort="1000.0" lower="${min}" upper="${max}" velocity="0.5"/>
+            <origin rpy="${origin_rpy}" xyz="${origin_xyz}"/>
+            <parent link="${parent}"/>
+            <child link="${child}"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:macro name="m_joint_p" params="name min max axis_xyz origin_rpy origin_xyz parent child">
+        <joint name="${name}" type="prismatic">
+            <axis xyz="${axis_xyz}"/>
+            <limit effort="1000.0" lower="${min}" upper="${max}" velocity="0.1"/>
+            <origin rpy="${origin_rpy}" xyz="${origin_xyz}"/>
+            <parent link="${parent}"/>
+            <child link="${child}"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:macro name="m_joint_f" params="name axis_xyz origin_rpy origin_xyz parent child">
+        <joint name="${name}" type="fixed">
+            <axis xyz="${axis_xyz}"/>
+            <origin rpy="${origin_rpy}" xyz="${origin_xyz}"/>
+            <parent link="${parent}"/>
+            <child link="${child}"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:macro name="m_link_cylinder" params="name origin_rpy origin_xyz radius length material">
+        <link name="${name}">
+            <visual>
+                <origin rpy="${origin_rpy}" xyz="${origin_xyz}"/>
+                <material name="${material}"/>
+                <geometry>
+                    <cylinder radius="${radius}" length="${length}"/>
+                </geometry>
+            </visual>
+        </link>
+    </xacro:macro>
+
+    <xacro:macro name="m_link_box" params="name origin_rpy origin_xyz size material">
+        <link name="${name}">
+            <visual>
+                <origin rpy="${origin_rpy}" xyz="${origin_xyz}"/>
+                <material name="${material}"/>
+                <geometry>
+	            <box size="${size}"/>
+                </geometry>
+            </visual>
+        </link>
+    </xacro:macro>
+    
+    <xacro:macro name="gripper_dh" params="name material">
+        <link name="${name}">
+            <visual>
+                <origin rpy="0 0 .78" xyz="0 0 0"/>
+                <material name="${material}"/>
+                <geometry>
+                    <box size="0.01 0.1 0.01"/>
+                </geometry>
+            </visual>
+            <visual>
+                <origin rpy="0 0 .78" xyz="0 0 0"/>
+                <material name="${material}"/>
+                <geometry>
+                    <box size="0.1 0.01 0.01"/>
+                </geometry>
+            </visual>
+            <visual>
+                <origin rpy="0 0 .78" xyz=".0318 -.0318 0.01"/>
+                <material name="${material}"/>
+                <geometry>
+                    <box size="0.01 0.01 0.03"/>
+                </geometry>
+            </visual>
+            <visual>
+                <origin rpy="0 0 .78" xyz="-.0318 .0318 0.01"/>
+                <material name="${material}"/>
+                <geometry>
+                    <box size="0.01 0.01 0.03"/>
+                </geometry>
+            </visual>
+            <visual>
+                <origin rpy="0 0 .78" xyz=".0318 .0318 0.01"/>
+                <material name="${material}"/>
+                <geometry>
+                    <box size="0.01 0.01 0.03"/>
+                </geometry>
+            </visual>
+            <visual>
+                <origin rpy="0 0 .78" xyz="-.0318 -.0318 0.01"/>
+                <material name="${material}"/>
+                <geometry>
+                    <box size="0.01 0.01 0.03"/>
+                </geometry>
+            </visual>
+        </link>  
+    </xacro:macro>
+
+    <xacro:macro name="gripper" params="name material">
+        <link name="${name}">
+            <visual>
+                <origin rpy="0 0 .78" xyz="0 0 0"/>
+                <material name="${material}"/>
+                <geometry>
+                    <box size="0.01 0.1 0.01"/>
+                </geometry>
+            </visual>
+            <visual>
+                <origin rpy="0 0 .78" xyz="0 0 0"/>
+                <material name="${material}"/>
+                <geometry>
+                    <box size="0.1 0.01 0.01"/>
+                </geometry>
+            </visual>
+            <visual>
+                <origin rpy="0 0 .78" xyz=".0318 -.0318 -0.02"/>
+                <material name="${material}"/>
+                <geometry>
+                    <box size="0.01 0.01 0.03"/>
+                </geometry>
+            </visual>
+            <visual>
+                <origin rpy="0 0 .78" xyz="-.0318 .0318 -0.02"/>
+                <material name="${material}"/>
+                <geometry>
+                    <box size="0.01 0.01 0.03"/>
+                </geometry>
+            </visual>
+            <visual>
+                <origin rpy="0 0 .78" xyz=".0318 .0318 -0.02"/>
+                <material name="${material}"/>
+                <geometry>
+                    <box size="0.01 0.01 0.03"/>
+                </geometry>
+            </visual>
+            <visual>
+                <origin rpy="0 0 .78" xyz="-.0318 -.0318 -0.02"/>
+                <material name="${material}"/>
+                <geometry>
+                    <box size="0.01 0.01 0.03"/>
+                </geometry>
+            </visual>
+        </link>  
+    </xacro:macro>
+    <material name="white">
+        <color rgba="1 1 1 1"/>
+    </material>
+
+    <material name="red">
+        <color rgba="1 0 0 1"/>
+    </material>
+
+    <material name="orange">
+        <color rgba="1 .65 0 1"/>
+    </material>
+
+    <material name="cyan">
+        <color rgba="0 1 1 1"/>
+    </material>
+    
+    <material name="yellow">
+        <color rgba="1 1 0 1"/>
+    </material>
+
+    <material name="green">
+        <color rgba="0 1 0 1"/>
+    </material>
+
+    <material name="blue">
+        <color rgba="0 0 1 1"/>
+    </material>
+</robot>
