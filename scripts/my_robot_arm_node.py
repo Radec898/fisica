@@ -33,14 +33,12 @@ class MyRoboticArmNode():
         msg.header.stamp = rospy.Time.now()
         msg.header.frame_id = 'base_link'
 	msg.name = []
-	"""
         msg.name = ['base_link__link_01', \
                     'link_01__link_02', \
                     'link_02__link_03', \
                     'link_03__link_04', \
                     'link_04__link_05', \
                     'link_05__gripper']
-	"""
         msg.position = list(self.arm.get_theta())
         msg.velocity = []
         msg.effort = []
