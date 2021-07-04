@@ -32,7 +32,7 @@ class MyRoboticArm():
             [0, 0, 0, 0, 0, 1],                                 \
             [0, 0, 1, self.d[1], 0, 0],                         \
             [1, 0, 0, 0, self.d[0] - self.d[2]/2, -self.d[1]],  \
-            [0, 0, 1, self.d[1], 0, 0] ], dtype=float)
+            [0, 1, 0, self.d[2]/2 - self.d[0], 0, 0] ], dtype=float)
 
         # matriz del elemento terminal en posición 0
         self.M = np.array([                     \
@@ -75,7 +75,7 @@ class MyRoboticArm():
     def __str__(self):
         s = "\t[MyRobotArm]\n"
         s += "\t - Eslabones [L1, L2, L3]:\t" + str(self.d) + "\n"
-        s += "\t - Articulaciones [theta]:\t" + str(self.theta) + "\n"
-        s += "\t - Elem. terminal [x,y,z]:\t" + str(self.get_terminal_pos()[:3]) + "\n"
+        s += "\t - Articulaciones [theta]:\t" + str(np.round(self.theta, 2)) + "\n"
+        s += "\t - Elem. terminal [x,y,z]:\t" + str(np.round(self.get_terminal_pos()[:3], 2)) + "\n"
         return s
 

@@ -42,8 +42,4 @@ class MyRoboticArmNode():
         msg.velocity = []
         msg.effort = []
 
-        print msg 
         self.state_pub.publish(msg)
-        
-
-

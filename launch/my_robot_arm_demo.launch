@@ -10,5 +10,4 @@
 
     <node name="my_robot_arm_demo" pkg="fisica" type="my_robot_arm_demo.py" output="screen" launch-prefix="gnome-terminal -e"/>
 
-
 </launch>

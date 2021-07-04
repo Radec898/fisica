@@ -27,7 +27,7 @@ def show_header():
     print "\t# - Autor: Gabriel Montoiro Varela       #"
     print "\t# - Curso: 2020/21                       #"
     print "\t##########################################"
-    print
+    print ""
 
 def show_menu():
     show_header()
@@ -36,7 +36,7 @@ def show_menu():
     print "\t\tP - Posicionar brazo (CD)"
     print "\t\tG - Generar gráfica (CD)"
     print "\t\tS - Salir"
-    print
+    print ""
     
 def get_menu_option():
     opc = None
