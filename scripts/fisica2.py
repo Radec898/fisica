@@ -7,10 +7,10 @@
 
 import numpy as np
 
-def Rotx(tetha):
+def Rotx(theta):
     """Crea una matriz de rotación sobre el eje X."""
-    c = np.cos(tetha)
-    s = np.sin(tetha)
+    c = np.cos(theta)
+    s = np.sin(theta)
     return np.array(
         [
             [1, 0,  0],
@@ -18,10 +18,10 @@ def Rotx(tetha):
             [0, s,  c]
         ])
 
-def Roty(tetha):
+def Roty(theta):
     """Crea una matriz de rotación sobre el eje Y."""
-    c = np.cos(tetha)
-    s = np.sin(tetha)
+    c = np.cos(theta)
+    s = np.sin(theta)
     return np.array(
         [
             [ c, 0, s],
@@ -29,10 +29,10 @@ def Roty(tetha):
             [-s, 0, c]
         ])
 
-def Rotz(tetha):
+def Rotz(theta):
     """Crea una matriz de rotación sobre el eje Z."""
-    c = np.cos(tetha)
-    s = np.sin(tetha)
+    c = np.cos(theta)
+    s = np.sin(theta)
     return np.array(
         [
             [c, -s, 0],
@@ -44,11 +44,11 @@ def norm(v):
     """Normaliza un vector"""
     return v/np.linalg.norm(v)
 
-def Rotv(w, tetha):
+def Rotv(w, theta):
     """Crea una matriz de rotación para el eje y ángulo suministrado."""
     w1, w2, w3 = norm(w)
-    c = np.cos(tetha)
-    s = np.sin(tetha)
+    c = np.cos(theta)
+    s = np.sin(theta)
     return np.array(
         [
             [c + w1*w1*(1 - c),     w1*w2*(1 - c) - w3*s,   w1*w3*(1 - c) + w2*s],
@@ -69,14 +69,17 @@ def so3ToVec(v):
     """Devuelve el vector a partir de la matriz antisimétrica."""
     return np.array([v[2,1], v[0,2], v[1,0]])
 
-def MatrixExp3(w, tetha):
+def MatrixExp3(w, theta):
     """
-    Devuelve la matriz exponencial a partir de un eje w y un ángulo tetha.
+    Formula de Rodrigues: Calcula la matriz exponencial de [w]*th a partir de un eje w y un ángulo theta.
     """
     so3 = VecToso3(w)
-    return np.identity(3) + np.sin(tetha)*so3 + (1 - np.cos(tetha))*so3.dot(so3)
+    return np.identity(3) + np.sin(theta)*so3 + (1 - np.cos(theta))*so3.dot(so3)
 
-def MatrixLog3(R):
+def MatrixLog3_parts(R):
+    """
+    Devuelve el eje unitario y el ángulo de rotación de una matriz SO(3)
+    """
     if np.array_equal(R, np.identity(3)):
         return .0, None
 
@@ -84,12 +87,27 @@ def MatrixLog3(R):
         w1 = (1 / np.sqrt(2 * (1 + R[2,2]))) * np.array([R[0,2], R[1,2], 1 + R[2,2]])
         w2 = (1 / np.sqrt(2 * (1 + R[1,1]))) * np.array([R[0,1], 1 + R[1,1], R[2,1]])
         w3 = (1 / np.sqrt(2 * (1 + R[0,0]))) * np.array([1 + R[0,0], R[1,0], R[2,0]])
-        return np.pi, w1, w2, w3
+        return np.pi, np,array([w1, w2, w3])
 
-    tetha = np.arccos(0.5 * (np.trace(R) - 1))
-    anti_w = (1 / (2 * np.sin(tetha))) * (R - R.T)
+    theta = np.arccos(0.5 * (np.trace(R) - 1))
+    anti_w = (1 / (2 * np.sin(theta))) * (R - R.T)
     w = so3ToVec(anti_w)
-    return tetha, w
+    return theta, w
+
+def MatrixLog3(R):
+    """
+    Devuelve la matriz logaritmo de una matriz de rotación
+    """
+    acosinput = (np.trace(R) - 1) *0.5 
+    if np.trace(R) >= 3: return np.zeros((3, 3))
+    elif np.trace(R) <= -1:
+        if abs(1 + R[2][2])>1.e-6:   omg = (1.0 / np.sqrt(2 * (1 + R[2][2]))) * np.array([R[0][2], R[1][2], 1 + R[2][2]])
+        elif abs(1 + R[1][1])>1.e-6: omg = (1.0 / np.sqrt(2 * (1 + R[1][1]))) * np.array([R[0][1], 1 + R[1][1], R[2][1]])
+        else: omg = (1.0 / np.sqrt(2 * (1 + R[0][0]))) * np.array([1 + R[0][0], R[1][0], R[2][0]])
+        return VecToso3(np.pi * omg)
+    else:
+        theta = np.arccos(acosinput)
+        return (theta*0.5)/np.sin(theta) * (R-np.array(R).T)
 
 def RpToTrans(R, p):
     """
@@ -157,20 +175,40 @@ def MatrixExp6(se3mat):
     """
     Matriz exponencial de un vector de giro en representación matricial 4x4.
     """
-    v_tetha = se3mat[:3, 3] # v*tetha
-    wmat_tetha = se3mat[:3, :3] # [w]*tetha
-    w_tetha = so3ToVec(wmat_tetha)
-    tetha = np.linalg.norm(w_tetha)
+    v_theta = se3mat[:3, 3] # v*theta
+    wmat_theta = se3mat[:3, :3] # [w]*theta
+    w_theta = so3ToVec(wmat_theta)
+    theta = np.linalg.norm(w_theta)
 
-    if tetha < 1E-6:
+    if theta < 1E-6:
         # no hay giro
-        return np.r_[np.c_[np.identity(3), v_tetha], [[0, 0, 0, 1]]]
+        return np.r_[np.c_[np.identity(3), v_theta], [[0, 0, 0, 1]]]
     else:
-        wmat = wmat_tetha/tetha
-        R_wtheta = np.identity(3) + np.sin(tetha)*wmat + (1 - np.cos(tetha))*np.dot(wmat, wmat)
-        G_wtetha = np.identity(3)*tetha + (1 - np.cos(tetha))*wmat + \
-                    (tetha - np.sin(tetha))*np.dot(wmat, wmat)
-        return np.r_[np.c_[R_wtheta, G_wtetha.dot(v_tetha/tetha)], [[0, 0, 0, 1]]]
+        wmat = wmat_theta/theta
+        R_wtheta = np.identity(3) + np.sin(theta)*wmat + (1 - np.cos(theta))*np.dot(wmat, wmat)
+        G_wtheta = np.identity(3)*theta + (1 - np.cos(theta))*wmat + \
+                    (theta - np.sin(theta))*np.dot(wmat, wmat)
+        return np.r_[np.c_[R_wtheta, G_wtheta.dot(v_theta/theta)], [[0, 0, 0, 1]]]
+
+def MatrixLog6(T):
+    """
+    Calcula la matriz logaritmo de una matriz de transformación homogénea
+    """
+    R = T[:3, :3]   # rotación
+    p = T[:3, 3]    # traslación
+
+    omgmat = MatrixLog3(R) # coordenadas exponenciales de la matriz de rotación
+                           # o sea, un vector de rotación como matriz antisimétrica so3 (3x3)
+    if np.array_equal(omgmat, np.zeros((3, 3))): # Si no hay rotación, es una matriz de ceros 
+        return np.r_[np.c_[np.zeros((3, 3)),p],[[0, 0, 0, 0]]]
+    else:
+        omgvec= so3ToVec(omgmat) # expresa la rotación como un vector en la dirección del eje por el ángulo
+        omgmat=omgmat/np.linalg.norm(omgvec) # el vector en el eje de rotación normalizado y en forma matricial
+        theta = np.linalg.norm(omgvec) # también se puede calcular como np.arccos((np.trace(R)-1)/2.0)
+        # a continuación aplicamos la definición que vimos en clase (ver diapositivas)
+        invG_theta=np.eye(3)/theta-omgmat*0.5+(1.0/theta-0.5/np.tan(theta*0.5))*np.dot(omgmat,omgmat)
+        v=np.dot(invG_theta,p)
+        return np.r_[np.c_[omgmat,v],[[0, 0, 0, 0]]]*theta # primero concatena columnas y luego filas    
 
 def CinematicaDirectaS(M, Smatrix, theta):
     """Devuelve la matriz de transformación homogénea del elemento terminal.
@@ -202,4 +240,32 @@ def CinematicaDirectaS(M, Smatrix, theta):
         T = T.dot(E[i])
 
     return T.dot(M)
+
+def TransMatrix(theta, p):
+    """Devuelve la matriz de transformación homogénea dada la orientación y la posición.
+
+    Parámetros
+    ----------
+    theta : np.array(3)
+        orientación en los tres ejes (ángulos de Euler)
+    p : np.array(3)
+        posición (x, y, z)
+    """
+
+    # ejes
+    eje_x = np.array([1, 0, 0])
+    eje_y = np.array([0, 1, 0])
+    eje_z = np.array([0, 0, 1])
+
+    # matrices exponenciales por cada eje
+    Rx = MatrixExp3(eje_x, theta[0])
+    Ry = MatrixExp3(eje_y, theta[1])
+    Rz = MatrixExp3(eje_z, theta[2])
+
+    # matriz de rotación
+    R = Rz.dot(Ry.dot(Rx))
+    print R, p
+
+    # devolvemos la matriz homogénea
+    return np.r_[np.c_[R, p], np.array([[0, 0, 0, 1]])]
 
