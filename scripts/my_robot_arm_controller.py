@@ -102,7 +102,15 @@ class MyRoboticArm():
 
         # vectores de cada eje al siguiente
         q = []
+        """
         q.append(np.array([0, 0, 0]))
+        q.append(np.array([0, 0, self.d[0]]))
+        q.append(np.array([0, self.d[1], 0]))
+        q.append(np.array([0, 0, self.d[2]/2]))
+        q.append(np.array([0, 0, 0]))
+        q.append(np.array([0, 0, 0]))
+        """
+        q.append(np.array([0, 0, self.d[0]]))
         q.append(np.array([0, 0, self.d[0]]))
         q.append(np.array([0, self.d[1], 0]))
         q.append(np.array([0, 0, self.d[2]/2]))
@@ -147,3 +155,81 @@ class MyRoboticArm():
 
         return J
 
+    def get_analytic_J(self):
+        L = sp.symbols('L1, L2, L3')
+        t = sp.symbols('t1, t2, t3, t4, t5, t6')
+
+        w = []  # ejes de rotación
+        q = []  # puntos
+        v = []  # velocidades
+
+        # Matrices de rotación
+        Rz1 = sp.Matrix([
+                [sp.cos(t[0]), -sp.sin(t[0]), 0],
+                [sp.sin(t[0]), sp.cos(t[0]), 0],
+                [0, 0, 1]])
+
+        Ry2 = sp.Matrix([
+                [sp.cos(t[1]), 0, sp.sin(t[1])],
+                [0, 1, 0],
+                [-sp.sin(t[1]), 0, sp.cos(t[1])]])
+        
+        Rz4= sp.Matrix([
+                [sp.cos(t[3]), -sp.sin(t[3]), 0],
+                [sp.sin(t[3]), sp.cos(t[3]), 0],
+                [0, 0, 1]])
+        
+        Rx5= sp.Matrix([
+                [1, 0, 0],
+                [0, sp.cos(t[4]), -sp.sin(t[4])],
+                [0, sp.sin(t[4]), sp.cos(t[4])]])
+
+
+        # eje 1 (rev: [0, 0, 1])
+        w.append(sp.Matrix([0, 0, 1]))
+        q.append(sp.Matrix([0,0,L[0]]))
+        v.append(-w[0].cross(q[0]))
+
+        # eje 2 (rev: [0, 1, 0])
+        w.append(Rz1*sp.Matrix([0,1,0]))
+        q.append(sp.Matrix([0,0,L[0]]))
+        v.append(-w[1].cross(q[1]))
+
+        # eje 3 (prism: [0, 0, 1])
+        w.append(sp.Matrix([0, 0, 0]))
+        q.append(sp.Matrix([0, 0, 0]))
+        v.append(Rz1*Ry2*sp.Matrix([0, 0, 1]))
+
+        # posición del elemento terminal
+        qt = sp.Matrix([0, 0, L[0]]) + Rz1*Ry2*sp.Matrix([0, L[1], L[0] - L[2]/2 + t[2]])
+
+        # eje 4 (rev: [0, 0, 1])
+        w.append(Rz1*Ry2*sp.Matrix([0, 0, 1]))
+        q.append(qt)
+        v.append(-w[3].cross(q[3]))
+
+        # eje 5 (rev: [1, 0, 0])
+        w.append(Rz1*Ry2*Rz4*sp.Matrix([1, 0, 0]))
+        q.append(qt)
+        v.append(-w[4].cross(q[4]))
+
+        # eje 6 (rev: [0, 1, 0])
+        w.append(Rz1*Ry2*Rz4*Rx5*sp.Matrix([0, 1, 0]))
+        q.append(qt)
+        v.append(-w[5].cross(q[5]))
+        
+        # Jacobiana
+        J = sp.Matrix.vstack(w[0], v[0])       
+        for i in range(1, 6, 1):
+            J = sp.Matrix.hstack(J, sp.Matrix.vstack(w[i], v[i])) 
+
+        return J
+
+if __name__ == '__main__':
+    r = MyRoboticArm(5,5,5)        
+    r.get_analytic_J()
+
+        
+
+
+                        
