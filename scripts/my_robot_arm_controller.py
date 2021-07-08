@@ -102,7 +102,6 @@ class MyRoboticArm():
 
         # vectores de cada eje al siguiente
         q = []
-        """
         q.append(np.array([0, 0, 0]))
         q.append(np.array([0, 0, self.d[0]]))
         q.append(np.array([0, self.d[1], 0]))
@@ -116,6 +115,7 @@ class MyRoboticArm():
         q.append(np.array([0, 0, self.d[2]/2]))
         q.append(np.array([0, 0, 0]))
         q.append(np.array([0, 0, 0]))
+        """
 
         # coordendas de las articulaciones
         t = sp.symbols('t0, t1, t2, t3, t4, t5')
