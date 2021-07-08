@@ -2,7 +2,7 @@
 
 <launch>
 
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find fisica)/launch/config.rviz"/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find fisica)/launch/config_demo.rviz"/>
 
     <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find fisica)/urdf/my_robot_arm.xacro'"/>
 

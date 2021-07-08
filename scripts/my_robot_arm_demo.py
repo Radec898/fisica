@@ -192,7 +192,7 @@ def main():
     """Programa principal."""
 
     # creamos una instancia del brazo articulado a partir de las dimensiones de los eslabones
-    arm = MyRoboticArm(5, 5, 5)
+    arm = MyRoboticArm(10, 10, 10)
 
     # creamos el nodo ROS que publicará el estado del brazo
     arm_ros_node = MyRoboticArmNode(arm)
