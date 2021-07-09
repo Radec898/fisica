@@ -7,6 +7,7 @@
 # ver:   0.1
 
 import numpy as np
+import sympy as sp
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 import time
@@ -31,16 +32,17 @@ def show_header():
 
 def show_menu():
     show_header()
-    print "\t\tR - Resetear robot"
+    print "\t\tR - Resetear posición"
     print "\t\tE - Mostrar estado"
-    print "\t\tP - Posicionar brazo (CD)"
-    print "\t\tG - Generar gráfica (CD)"
+    print "\t\tP - Posicionar brazo (Cinem. Directa)"
+    print "\t\tG - Gráfica de posición Elemento Terminal"
+    print "\t\tM - Elipsoide de Manipulabilidad/Fuerza"
     print "\t\tS - Salir"
     print ""
     
 def get_menu_option():
     opc = None
-    while opc not in ('R', 'E', 'P', 'G', 'S'):
+    while opc not in ('R', 'E', 'P', 'G', 'M', 'S'):
         show_menu()
         opc = raw_input("\tOpción > ").upper()
     return opc
@@ -187,7 +189,82 @@ def opc_genera_grafica(arm):
     plt.show()
 
     end_option()
-    
+
+def opc_genera_elipsoides(arm):
+    """
+    Genera el elipsoide de manipulabilidad para la configuración actual y velocidades en 
+    las tres primeras articulaciones
+
+    Parámetros
+    ----------
+    arm : MyArmController
+        instancia del brazo articulado
+    """
+    show_header()
+
+    print "\tGenerando esfera de velocidadesi/fuerzas de las articulaciones [θ1/τ1, θ2/τ2, θ3/τ3]...\n"
+
+    # esfera de velocidades de las articulaciones
+    r = 1
+    u_list = np.linspace(0, 2*np.pi, 25) 
+    v_list = np.linspace(0, np.pi, 25) 
+    vj1 = np.array([])
+    vj2 = np.array([])
+    vj3 = np.array([])
+    for u in u_list:
+        for v in v_list:
+            vj1 = np.r_[vj1, r*np.cos(v)*np.cos(u)]
+            vj2 = np.r_[vj2, r*np.cos(v)*np.sin(u)]
+            vj3 = np.r_[vj3, r*np.sin(v)]
+    vj1 = np.r_[vj1, vj1]
+    vj2 = np.r_[vj2, vj2]
+    vj3 = np.r_[vj3, -vj3]
+
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    ax.set_xlabel(r'${\dot\theta_1}$ / ${\tau_1}$')
+    ax.set_ylabel(r'${\dot\theta_2}$ / ${\tau_2}$')
+    ax.set_zlabel(r'${\dot\theta_3}$ / ${\tau_3}$')
+    ax.scatter(vj1, vj2, vj3)
+    plt.show()
+
+    print "\tGenerando elipsoide de manipulabilidad/fuerza...\n"
+
+    # Jacobiana para la configuración actual
+    J = arm.get_analytic_J() # Jacobiana analítica
+    #J = arm.get_J() # Jacobiana (ejercicios)
+    d = arm.get_D() # dimensiones de los eslabones
+    th = arm.get_theta() # posiciones actuales de las articulaciones
+    t = sp.symbols('t0, t1, t2, t3, t4, t5')
+    L = sp.symbols('L1, L2, L3')
+    J_actual = np.array(J.subs({L[0]:d[0], L[1]:d[1], L[2]:d[2], \
+                t[0]:th[0],t[1]:th[1],t[2]:th[2],t[3]:th[3],t[4]:th[4],t[5]:th[5]})).astype(float)
+    J_inv = np.linalg.pinv(J_actual.T)
+   
+    # aplicamos la Jacobiana a las velocidades de las articulaciones para obtener las 
+    # velocidades del elemento terminal
+    vee = np.array([]).reshape([0, 6]) # matriz vacía de 6 columnas para las velocidades del EE
+    fee = np.array([]).reshape([0, 6]) # matriz vacía de 6 columnas para las velocidades del EE
+    for i in range(vj1.shape[0]):
+        vjoint = np.array([vj1[i], vj2[i], vj3[i], 0, 0, 0]) # vector de velocidades articulaciones
+        vl = np.dot(J_actual, vjoint).reshape([1,6]).astype(float) # nuevo vector de velocidades del EE
+        fz = np.dot(J_inv, vjoint).reshape([1,6]).astype(float) # nuevo vector de velocidades del EE
+        vee = np.r_[vee, vl] # añadimos el nuevo vector de velocidades del EE
+        fee = np.r_[fee, fz] # añadimos el nuevo vector de velocidades del EE
+        
+    # mostramos el elipsoide    
+    fig = plt.figure()
+    ax = plt.axes(projection='3d')
+    ax.set_xlabel(r'${\dot{x_1}}$ / ${\dot{f_1}}$')
+    ax.set_ylabel(r'${\dot{x_2}}$ / ${\dot{f_2}}$')
+    ax.set_zlabel(r'${\dot{x_3}}$ / ${\dot{f_3}}$')
+    ax.scatter(vee[:,0], vee[:,1], vee[:,2], label='manipulabilidad')
+    ax.scatter(fee[:,0], fee[:,1], fee[:,2], label='fuerza')
+    plt.legend()
+    plt.show()
+
+    end_option()
+
 def main():
     """Programa principal."""
 
@@ -216,6 +293,9 @@ def main():
 
         elif opc == 'G':
             opc_genera_grafica(arm)     
+
+        elif opc == 'M':
+            opc_genera_elipsoides(arm) 
 
 if __name__ == '__main__':
     main()

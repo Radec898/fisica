@@ -53,6 +53,10 @@ class MyRoboticArm():
     def get_S(self):
         """Devuelve los ejes helicoidales en la posición 0 del robot."""
         return np.array(self.omega)
+
+    def get_D(self):
+        """Devuelve las dimensiones de los eslabones"""
+        return np.array(self.d)
  
     def get_theta(self):
         return np.array(self.theta)
@@ -91,31 +95,25 @@ class MyRoboticArm():
     def get_J(self):
         """Devuelve la matriz Jacobiana para la configuración actual del robot."""
 
-        # ejes de rotación
+        L = sp.symbols('L1, L2, L3')
+
+        # ejes de rotación (la posición 0 indica rotación(0), prismático(1))
         w = []
         w.append(np.array([0, 0, 1]))
         w.append(np.array([0, 1, 0]))
         w.append(np.array([0, 0, 0]))
         w.append(np.array([0, 0, 1]))
         w.append(np.array([1, 0, 0]))
-        w.append(np.array([0, 0, 0])) 
+        w.append(np.array([0, 1, 0])) 
 
         # vectores de cada eje al siguiente
         q = []
         q.append(np.array([0, 0, 0]))
-        q.append(np.array([0, 0, self.d[0]]))
-        q.append(np.array([0, self.d[1], 0]))
-        q.append(np.array([0, 0, self.d[2]/2]))
+        q.append(np.array([0, 0, L[0]]))
+        q.append(np.array([0, L[1], 0]))
+        q.append(np.array([0, 0, -L[2]/2]))
         q.append(np.array([0, 0, 0]))
         q.append(np.array([0, 0, 0]))
-        """
-        q.append(np.array([0, 0, self.d[0]]))
-        q.append(np.array([0, 0, self.d[0]]))
-        q.append(np.array([0, self.d[1], 0]))
-        q.append(np.array([0, 0, self.d[2]/2]))
-        q.append(np.array([0, 0, 0]))
-        q.append(np.array([0, 0, 0]))
-        """
 
         # coordendas de las articulaciones
         t = sp.symbols('t0, t1, t2, t3, t4, t5')
@@ -130,11 +128,14 @@ class MyRoboticArm():
         qs = []
         ws = []
         Ri = R[0]
+        vs2 = None
         qs.append(sp.Matrix(q[0]))
         ws.append(sp.Matrix(w[0]))
         for i in range(1, 6, 1):
             ws.append(Ri*sp.Matrix(w[i]))
             qs.append(Ri*sp.Matrix(q[i]) + qs[i-1])
+            # el eje i=2 es prismático en z
+            if i==2: vs2 = Ri*sp.Matrix([0, 0, 1])
             Ri = Ri * R[i]
 
         # calculamos las velocidades lineales, los vectores de giro correspondientes y la matriz Jacobiana
@@ -145,11 +146,9 @@ class MyRoboticArm():
         Ji.append(ws[i].row_insert(3, vs[i]))
         J = Ji[0]
         for i in range(1, 6, 1):
-            
-            if i==2: vs.append(sp.Matrix([0, 0, 1]))
+            # el eje i=2 es prismático en z
+            if i==2: vs.append(vs2)
             else: vs.append(qs[i].cross(ws[i]))
-            
-            #vs.append(qs[i].cross(ws[i]))
             Ji.append(ws[i].row_insert(3, vs[i]))
             J = J.col_insert(i, Ji[i])
 
@@ -157,7 +156,7 @@ class MyRoboticArm():
 
     def get_analytic_J(self):
         L = sp.symbols('L1, L2, L3')
-        t = sp.symbols('t1, t2, t3, t4, t5, t6')
+        t = sp.symbols('t0, t1, t2, t3, t4, t5')
 
         w = []  # ejes de rotación
         q = []  # puntos
@@ -201,7 +200,7 @@ class MyRoboticArm():
         v.append(Rz1*Ry2*sp.Matrix([0, 0, 1]))
 
         # posición del elemento terminal
-        qt = sp.Matrix([0, 0, L[0]]) + Rz1*Ry2*sp.Matrix([0, L[1], L[0] - L[2]/2 + t[2]])
+        qt = sp.Matrix([0, 0, L[0]]) + Rz1*Ry2*sp.Matrix([0, L[1], -L[2]/2 + t[2]])
 
         # eje 4 (rev: [0, 0, 1])
         w.append(Rz1*Ry2*sp.Matrix([0, 0, 1]))
