@@ -1,9 +1,17 @@
 <?xml version="1.0"?>
 
+<!--
+# Modelo de brazo robotíco 6DOF 2RP3R (tipo Stanford)
+#
+# Gabriel Montoiro Varela
+-->
+
 <robot name="my_robot_arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+    <!-- definición de macros -->
     <xacro:include filename="$(find my_robot_arm)/urdf/links_joints.xacro"/>
 
+    <!-- dimensiones de los eslabones -->
     <xacro:property name="h1" value=".3"/>
     <xacro:property name="d2" value=".3"/>
     <xacro:property name="d3" value=".3"/>
