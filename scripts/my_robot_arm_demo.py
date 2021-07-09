@@ -34,7 +34,7 @@ def show_menu():
     show_header()
     print "\t\tR - Resetear posición"
     print "\t\tE - Mostrar estado"
-    print "\t\tP - Posicionar brazo (Cinem. Directa)"
+    print "\t\tP - Posicionar brazo"
     print "\t\tG - Gráfica de posición Elemento Terminal"
     print "\t\tM - Elipsoide de Manipulabilidad/Fuerza"
     print "\t\tS - Salir"
@@ -244,13 +244,13 @@ def opc_genera_elipsoides(arm):
     # aplicamos la Jacobiana a las velocidades de las articulaciones para obtener las 
     # velocidades del elemento terminal
     vee = np.array([]).reshape([0, 6]) # matriz vacía de 6 columnas para las velocidades del EE
-    fee = np.array([]).reshape([0, 6]) # matriz vacía de 6 columnas para las velocidades del EE
+    fee = np.array([]).reshape([0, 6]) # matriz vacía de 6 columnas para las fuerzas en el EE
     for i in range(vj1.shape[0]):
         vjoint = np.array([vj1[i], vj2[i], vj3[i], 0, 0, 0]) # vector de velocidades articulaciones
         vl = np.dot(J_actual, vjoint).reshape([1,6]).astype(float) # nuevo vector de velocidades del EE
-        fz = np.dot(J_inv, vjoint).reshape([1,6]).astype(float) # nuevo vector de velocidades del EE
+        fz = np.dot(J_inv, vjoint).reshape([1,6]).astype(float) # nuevo vector de fuerzas en el EE
         vee = np.r_[vee, vl] # añadimos el nuevo vector de velocidades del EE
-        fee = np.r_[fee, fz] # añadimos el nuevo vector de velocidades del EE
+        fee = np.r_[fee, fz] # añadimos el nuevo vector de fuerzas en el EE
         
     # mostramos el elipsoide    
     fig = plt.figure()
