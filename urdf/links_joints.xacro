@@ -1,12 +1,5 @@
 <?xml version="1.0"?>
 
-<!--
-# Macros para la creación de articulaciones, eslabones de tipo rotacional, prismático y fijo,
-# y para la creación de la pinza del elemento terminal
-#
-# Gabriel Montoiro Varela
--->
-
 <robot name="my_robot_arm_macros" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
     <xacro:macro name="m_joint_r" params="name min max axis_xyz origin_rpy origin_xyz parent child">
